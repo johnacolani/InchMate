@@ -16,17 +16,25 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   String _expressionBuffer = '';
   String _displayBuffer = '0';
 
+  // True right after '=', so the next digit/fraction starts a fresh entry
+  // while a following operator continues from the result.
+  bool _justEvaluated = false;
+
+  // True when the display is currently showing an operator/parenthesis, so the
+  // next digit replaces it on the display instead of appending to it.
+  bool _displayIsOperator = false;
+
   CalculatorBloc({
     required this.calculate,
     required this.convertUnits,
     required this.formatFraction,
     required this.parseFraction,
   }) : super(CalculatorState(
-    displayText: '0',
-    expression: '',
-    linearResult: '',
-    squareResult: '',
-  )) {
+          displayText: '0',
+          expression: '',
+          linearResult: '',
+          squareResult: '',
+        )) {
     on<ClearEvent>(_handleClear);
     on<DigitEvent>(_handleDigit);
     on<FractionEvent>(_handleFraction);
@@ -38,9 +46,16 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     on<BackspaceEvent>(_handleBackspace);
   }
   void _handleBackspace(BackspaceEvent event, Emitter<CalculatorState> emit) {
+    // After '=' the buffer holds a quoted result token; backspacing a single
+    // char would corrupt it, so treat backspace as a clear in that case.
+    if (_justEvaluated) {
+      _handleClear(ClearEvent(), emit);
+      return;
+    }
     if (_expressionBuffer.isNotEmpty) {
       // Remove the last character from both buffers
-      _expressionBuffer = _expressionBuffer.substring(0, _expressionBuffer.length - 1);
+      _expressionBuffer =
+          _expressionBuffer.substring(0, _expressionBuffer.length - 1);
       _displayBuffer = _displayBuffer.length > 1
           ? _displayBuffer.substring(0, _displayBuffer.length - 1)
           : '0';
@@ -51,9 +66,12 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
       ));
     }
   }
+
   void _handleClear(ClearEvent event, Emitter<CalculatorState> emit) {
     _expressionBuffer = '';
     _displayBuffer = '0';
+    _justEvaluated = false;
+    _displayIsOperator = false;
     emit(state.copyWith(
       displayText: '0',
       expression: '',
@@ -63,11 +81,21 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _handleDigit(DigitEvent event, Emitter<CalculatorState> emit) {
-    if (_displayBuffer == '0' || _expressionBuffer.endsWith(')')) {
+    // Pressing a digit after '=' starts a brand new expression.
+    if (_justEvaluated) {
+      _expressionBuffer = '';
+      _displayBuffer = '0';
+      _justEvaluated = false;
+    }
+
+    if (_displayBuffer == '0' ||
+        _displayIsOperator ||
+        _expressionBuffer.endsWith(')')) {
       _displayBuffer = event.digit;
     } else {
       _displayBuffer += event.digit;
     }
+    _displayIsOperator = false;
     _expressionBuffer += event.digit;
     emit(state.copyWith(
       displayText: _displayBuffer,
@@ -78,6 +106,14 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _handleFraction(FractionEvent event, Emitter<CalculatorState> emit) {
+    // Pressing a fraction after '=' starts a brand new expression.
+    if (_justEvaluated) {
+      _expressionBuffer = '';
+      _displayBuffer = '0';
+      _justEvaluated = false;
+    }
+    _displayIsOperator = false;
+
     String newFraction = event.fraction.replaceAll('"', '');
     String quotedFraction;
 
@@ -103,14 +139,13 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
 
       // Replace the extracted number with the mixed number in quotes
       int startIndex = i + 1;
-      _expressionBuffer = _expressionBuffer.substring(0, startIndex) +
-          '"$mixedNumber"'; // Ensure quotes are added here
+      _expressionBuffer =
+          '${_expressionBuffer.substring(0, startIndex)}"$mixedNumber"'; // Ensure quotes are added here
 
       // Add space before the quoted mixed number if needed
       if (startIndex > 0 && _expressionBuffer[startIndex - 1] != ' ') {
-        _expressionBuffer = _expressionBuffer.substring(0, startIndex) +
-            ' ' +
-            _expressionBuffer.substring(startIndex);
+        _expressionBuffer =
+            '${_expressionBuffer.substring(0, startIndex)} ${_expressionBuffer.substring(startIndex)}';
       }
     } else {
       _displayBuffer = newFraction;
@@ -131,9 +166,24 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _handleOperator(OperatorEvent event, Emitter<CalculatorState> emit) {
-    // Add operator with spaces to ensure tokenization works
-    _expressionBuffer += ' ${event.operator} ';
+    // After '=' an operator continues from the result.
+    _justEvaluated = false;
+
+    final trimmed = _expressionBuffer.trimRight();
+
+    // Can't start an expression with an operator.
+    if (trimmed.isEmpty) return;
+
+    if (_isOperator(trimmed[trimmed.length - 1])) {
+      // Replace a trailing operator instead of stacking another one.
+      _expressionBuffer =
+          '${trimmed.substring(0, trimmed.length - 1).trimRight()} ${event.operator} ';
+    } else {
+      _expressionBuffer = '$trimmed ${event.operator} ';
+    }
+
     _displayBuffer = event.operator;
+    _displayIsOperator = true;
     emit(state.copyWith(
       displayText: _displayBuffer,
       expression: _expressionBuffer,
@@ -142,10 +192,19 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     ));
   }
 
-  void _handleParenthesis(ParenthesisEvent event, Emitter<CalculatorState> emit) {
+  void _handleParenthesis(
+      ParenthesisEvent event, Emitter<CalculatorState> emit) {
+    // An open parenthesis after '=' starts a fresh expression.
+    if (_justEvaluated && event.isOpen) {
+      _expressionBuffer = '';
+      _displayBuffer = '0';
+    }
+    _justEvaluated = false;
+
     final parenthesis = event.isOpen ? '(' : ')';
     _expressionBuffer += ' $parenthesis ';
     _displayBuffer = parenthesis;
+    _displayIsOperator = true;
     emit(state.copyWith(
       displayText: _displayBuffer,
       expression: _expressionBuffer,
@@ -155,6 +214,7 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _handleEquals(EqualsEvent event, Emitter<CalculatorState> emit) {
+    if (_expressionBuffer.trim().isEmpty) return;
     try {
       final result = _evaluateExpression(_expressionBuffer);
       final formattedResult = formatFraction.execute(result);
@@ -167,10 +227,13 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
         linearResult: linear,
         squareResult: square,
       ));
-      _expressionBuffer = formattedResult;
+      // Store the result as a single quoted token so a mixed number (e.g.
+      // "1 1/2") survives tokenization when the user keeps calculating.
+      _expressionBuffer = '"$formattedResult"';
       _displayBuffer = formattedResult;
+      _justEvaluated = true;
+      _displayIsOperator = false;
     } catch (e) {
-      print('Evaluation error: $e'); // Debug output
       emit(state.copyWith(
         displayText: 'Error',
         expression: _expressionBuffer,
@@ -181,30 +244,18 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   void _handleNegate(NegateEvent event, Emitter<CalculatorState> emit) {
-    if (_displayBuffer.isNotEmpty && _displayBuffer != '0') {
-      if (_displayBuffer.startsWith('-')) {
-        _displayBuffer = _displayBuffer.substring(1);
-        _expressionBuffer = _expressionBuffer.replaceRange(
-            _expressionBuffer.lastIndexOf(' "-'), null, ' "');
-      } else {
-        _displayBuffer = '-$_displayBuffer';
-        _expressionBuffer = _expressionBuffer.replaceRange(
-            _expressionBuffer.length - _displayBuffer.length - 1, null, '"-$_displayBuffer"');
-      }
-      emit(state.copyWith(
-        displayText: _displayBuffer,
-        expression: _expressionBuffer,
-        linearResult: state.linearResult,
-        squareResult: state.squareResult,
-      ));
-    }
-  }
+    final start = _lastValueTokenStart();
+    if (start < 0) return;
 
-  void _handlePercent(PercentEvent event, Emitter<CalculatorState> emit) {
-    final currentValue = parseFraction.execute(_displayBuffer);
-    final percentValue = currentValue / Fraction(100);
-    _displayBuffer = formatFraction.execute(percentValue);
-    _expressionBuffer += ' % ';
+    final inner = _expressionBuffer.substring(start).replaceAll('"', '');
+    if (inner.isEmpty || inner == '0') return;
+
+    final negated = inner.startsWith('-') ? inner.substring(1) : '-$inner';
+
+    _displayBuffer = negated;
+    _expressionBuffer = '${_expressionBuffer.substring(0, start)}"$negated"';
+    _justEvaluated = false;
+    _displayIsOperator = false;
     emit(state.copyWith(
       displayText: _displayBuffer,
       expression: _expressionBuffer,
@@ -213,12 +264,64 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     ));
   }
 
+  void _handlePercent(PercentEvent event, Emitter<CalculatorState> emit) {
+    final start = _lastValueTokenStart();
+    if (start < 0) return;
+
+    try {
+      final inner = _expressionBuffer.substring(start).replaceAll('"', '');
+      final currentValue = parseFraction.execute(inner);
+      final percentValue = currentValue / Fraction(100);
+      final formatted = formatFraction.execute(percentValue);
+
+      // Replace the last value token with the quoted percent result instead of
+      // appending a bare '%', which is not a valid token for evaluation.
+      _displayBuffer = formatted;
+      _expressionBuffer =
+          '${_expressionBuffer.substring(0, start)}"$formatted"';
+      _justEvaluated = false;
+      _displayIsOperator = false;
+      emit(state.copyWith(
+        displayText: _displayBuffer,
+        expression: _expressionBuffer,
+        linearResult: state.linearResult,
+        squareResult: state.squareResult,
+      ));
+    } catch (_) {
+      // Nothing sensible to take a percentage of; ignore.
+    }
+  }
+
+  /// Returns the start index of the last value token in [_expressionBuffer] —
+  /// either a quoted "..." token or a trailing run of digits/'/'. Returns -1
+  /// when the buffer doesn't end in a value (e.g. ends with an operator).
+  int _lastValueTokenStart() {
+    int i = _expressionBuffer.length - 1;
+    while (i >= 0 && _expressionBuffer[i] == ' ') {
+      i--;
+    }
+    if (i < 0) return -1;
+
+    if (_expressionBuffer[i] == '"') {
+      int j = i - 1;
+      while (j >= 0 && _expressionBuffer[j] != '"') {
+        j--;
+      }
+      return j; // index of the opening quote (or -1 if unbalanced)
+    }
+
+    if (!RegExp(r'[0-9/]').hasMatch(_expressionBuffer[i])) return -1;
+    int j = i;
+    while (j >= 0 && RegExp(r'[0-9/]').hasMatch(_expressionBuffer[j])) {
+      j--;
+    }
+    return j + 1;
+  }
+
   Fraction _evaluateExpression(String expression) {
     final tokens = _tokenize(expression);
     final List<Fraction> values = [];
     final List<String> operators = [];
-
-    print('Tokens: $tokens'); // Debug: Print tokens to verify
 
     for (var token in tokens) {
       if (_isNumber(token)) {
@@ -289,15 +392,16 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
   }
 
   bool _isNumber(String token) =>
-      token.startsWith('"') || // Quoted fractions/mixed numbers like "1/2" or "1 1/2"
-          RegExp(r'^-?\d+(/\d+)?$').hasMatch(token) || // Matches "1/2", "-5/3"
-          RegExp(r'^\d+$').hasMatch(token); // Matches digits like "4", "10", "45"
+      token.startsWith(
+          '"') || // Quoted fractions/mixed numbers like "1/2" or "1 1/2"
+      RegExp(r'^-?\d+(/\d+)?$').hasMatch(token) || // Matches "1/2", "-5/3"
+      RegExp(r'^\d+$').hasMatch(token); // Matches digits like "4", "10", "45"
 
   bool _isOperator(String token) => ['+', '-', '×', '÷'].contains(token);
 
   int _precedence(String operator) => switch (operator) {
-    '+' || '-' => 1,
-    '×' || '÷' => 2,
-    _ => 0,
-  };
+        '+' || '-' => 1,
+        '×' || '÷' => 2,
+        _ => 0,
+      };
 }

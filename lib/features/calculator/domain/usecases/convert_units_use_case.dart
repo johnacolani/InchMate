@@ -2,8 +2,14 @@ import 'package:fraction/fraction.dart';
 
 class ConvertUnitsUseCase {
   String execute(Fraction inches, bool isSquare) {
+    // Compute the magnitude and apply the sign once, so negative values don't
+    // produce inconsistent whole/decimal parts.
+    final negative = inches.toDouble() < 0;
+    final sign = negative ? '-' : '';
+    final absInches = negative ? inches * Fraction(-1) : inches;
+
     if (isSquare) {
-      final totalSqIn = inches.toDouble();
+      final totalSqIn = absInches.toDouble();
       final wholeSqFt = (totalSqIn / 144).floor();
       final remainderSqIn = totalSqIn % 144;
 
@@ -13,14 +19,13 @@ class ConvertUnitsUseCase {
       // Format to 3 decimal places
       final formattedDecimal = decimalPart.toStringAsFixed(3);
 
-      return "$wholeSqFt.${formattedDecimal.split('.')[1]} sq ft";
+      return "$sign$wholeSqFt.${formattedDecimal.split('.')[1]} sq ft";
     } else {
       // Existing linear conversion
-      final totalInches = inches;
-      final wholeFeet = (totalInches / Fraction(12)).toDouble().truncate();
-      final remainderInches = totalInches - Fraction(wholeFeet * 12);
+      final wholeFeet = (absInches / Fraction(12)).toDouble().truncate();
+      final remainderInches = absInches - Fraction(wholeFeet * 12);
 
-      return "${wholeFeet.toInt()} ft ${formatFraction(remainderInches)} in";
+      return "$sign$wholeFeet ft ${formatFraction(remainderInches)} in";
     }
   }
 

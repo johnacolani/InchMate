@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
   Future<void> _checkVersionAndStartSplash() async {
     final newVersion = NewVersionPlus(
-      iOSId: '', // Add your iOS App ID here (e.g., 'id123456789')
+      iOSId: '6742278209', // Add your iOS App ID here (e.g., 'id123456789')
       androidId: 'com.johncolani.fractioflow',
     );
 
