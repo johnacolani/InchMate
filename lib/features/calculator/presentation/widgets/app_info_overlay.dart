@@ -23,7 +23,7 @@ class _AppInfoOverlayState extends State<AppInfoOverlay>
     final Uri uri = Uri(
       scheme: 'mailto',
       path: _contactEmail,
-      query: 'subject=Fraction Flow Support',
+      query: 'subject=InchMate Support',
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
@@ -132,7 +132,7 @@ class _AppInfoOverlayState extends State<AppInfoOverlay>
           child: Column(
             children: [
               Text(
-                'Fraction Flow',
+                'InchMate',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18.sp,

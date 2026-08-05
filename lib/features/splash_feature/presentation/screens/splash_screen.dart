@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';  // Import Lottie package
-import 'package:handi_calc/features/splash_feature/presentation/bloc/splash_bloc.dart';
-import 'package:handi_calc/features/splash_feature/presentation/bloc/splash_event.dart';
+import 'package:inch_mate/features/splash_feature/presentation/bloc/splash_bloc.dart';
+import 'package:inch_mate/features/splash_feature/presentation/bloc/splash_event.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 
 import '../../../calculator/presentation/screens/fraction_calculator_screen.dart';

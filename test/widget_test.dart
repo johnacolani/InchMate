@@ -7,9 +7,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fraction/fraction.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/calculator_use_case.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/format_fraction_use_case.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/parse_fraction_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/calculator_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/format_fraction_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/parse_fraction_use_case.dart';
 
 
 void main() {

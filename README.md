@@ -1,4 +1,4 @@
-# handi_calc
+# InchMate
 
 A new Flutter project.
 

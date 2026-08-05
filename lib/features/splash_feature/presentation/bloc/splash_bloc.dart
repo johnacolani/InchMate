@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:handi_calc/features/splash_feature/presentation/bloc/splash_event.dart';
-import 'package:handi_calc/features/splash_feature/presentation/bloc/splash_state.dart';
+import 'package:inch_mate/features/splash_feature/presentation/bloc/splash_event.dart';
+import 'package:inch_mate/features/splash_feature/presentation/bloc/splash_state.dart';
 
 class SplashBloc extends Bloc <SplashEvent, SplashState> {
   SplashBloc() :super(SplashInitial()) {

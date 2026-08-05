@@ -1,5 +1,5 @@
 // Comprehensive scenario tests covering every way a user can interact with the
-// Fraction Flow calculator: whole-number math, fraction math, mixed-number
+// InchMate calculator: whole-number math, fraction math, mixed-number
 // measurements, order of operations, parentheses, percent, negate, editing
 // (backspace/clear), linear-foot / square-foot conversion, and error/stability
 // edge cases.
@@ -9,12 +9,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fraction/fraction.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/calculator_use_case.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/convert_units_use_case.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/format_fraction_use_case.dart';
-import 'package:handi_calc/features/calculator/domain/usecases/parse_fraction_use_case.dart';
-import 'package:handi_calc/features/calculator/presentation/blocs/calculator_bloc.dart';
-import 'package:handi_calc/features/calculator/presentation/blocs/calculator_event.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/calculator_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/convert_units_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/format_fraction_use_case.dart';
+import 'package:inch_mate/features/calculator/domain/usecases/parse_fraction_use_case.dart';
+import 'package:inch_mate/features/calculator/presentation/blocs/calculator_bloc.dart';
+import 'package:inch_mate/features/calculator/presentation/blocs/calculator_event.dart';
 
 CalculatorBloc _newBloc() => CalculatorBloc(
       calculate: CalculatorUseCase(),

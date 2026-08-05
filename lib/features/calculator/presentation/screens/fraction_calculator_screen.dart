@@ -20,7 +20,7 @@ class FractionCalculatorScreen extends StatelessWidget {
         backgroundColor: Color(0xFF191818),
         title: Center(
           child: Text(
-            'Fraction Flow',
+            'InchMate',
             style: TextStyle(color: Colors.grey.shade300, fontSize: 16.sp),
           ),
         ),
