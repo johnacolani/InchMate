@@ -76,7 +76,7 @@ class CalculatorButton extends StatelessWidget {
     } else if (text == ")") {
       bloc.add(ParenthesisEvent(false));
     } else if (text.contains("/")) {
-      bloc.add(FractionEvent('"${text}"'));
+      bloc.add(FractionEvent('"$text"'));
     } else {
       bloc.add(DigitEvent(text));
     }

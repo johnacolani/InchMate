@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:handi_calc/features/splash_feature/presentation/screens/splash_screen.dart';
-import 'package:new_version_plus/new_version_plus.dart';
 import 'features/calculator/domain/usecases/calculator_use_case.dart';
 import 'features/calculator/domain/usecases/convert_units_use_case.dart';
 import 'features/calculator/domain/usecases/format_fraction_use_case.dart';

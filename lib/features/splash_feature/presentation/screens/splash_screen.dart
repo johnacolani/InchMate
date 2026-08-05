@@ -33,11 +33,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       final status = await newVersion.getVersionStatus();
+      if (!mounted) return;
       if (status != null) {
-        print("Local Version: ${status.localVersion}");
-        print("Store Version: ${status.storeVersion}");
-        print("Can Update: ${status.canUpdate}");
-
         if (status.canUpdate) {
           newVersion.showUpdateDialog(
             context: context,
@@ -49,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             dismissButtonText: 'Later',
             allowDismissal: true,
             dismissAction: () {
+              if (!mounted) return;
               Navigator.of(context).pop(); // Dismiss dialog
               context.read<SplashBloc>().add(StartSplash()); // Start splash logic
             },
@@ -58,11 +56,10 @@ class _SplashScreenState extends State<SplashScreen> {
           context.read<SplashBloc>().add(StartSplash());
         }
       } else {
-        print("Unable to fetch version status");
         context.read<SplashBloc>().add(StartSplash()); // Proceed anyway
       }
     } catch (e) {
-      print("Error checking version: $e");
+      if (!mounted) return;
       context.read<SplashBloc>().add(StartSplash()); // Proceed on error
     }
   }
@@ -78,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF191818FF),
+        backgroundColor: const Color(0xFF191818),
         body: Center(
           child: SizedBox(
             width: 250.w,
