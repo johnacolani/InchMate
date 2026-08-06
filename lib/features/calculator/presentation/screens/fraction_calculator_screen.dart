@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -8,6 +9,7 @@ import '../blocs/calculator_bloc.dart';
 import '../blocs/calculator_state.dart';
 import '../widgets/app_info_overlay.dart';
 import '../widgets/calculator_button.dart';
+import '../widgets/history_sheet.dart';
 
 class FractionCalculatorScreen extends StatelessWidget {
   const FractionCalculatorScreen({super.key});
@@ -36,6 +38,13 @@ class FractionCalculatorScreen extends StatelessWidget {
             barrierColor: Colors.transparent,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.history, color: Colors.white, size: 20.dm),
+            tooltip: 'History',
+            onPressed: () => HistorySheet.show(context),
+          ),
+        ],
       ),
       body: BlocBuilder<CalculatorBloc, CalculatorState>(
         builder: (context, state) {
@@ -53,7 +62,7 @@ class FractionCalculatorScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildDisplaySection(context, state, constraints),
-                    _buildResultContainers(state),
+                    _buildResultContainers(context, state),
                     _buildScrollableCalculatorButtons(context),
                     // _buildAdBanner(),
                   ],
@@ -62,6 +71,19 @@ class FractionCalculatorScreen extends StatelessWidget {
             );
           });
         },
+      ),
+    );
+  }
+
+  void _copyValue(BuildContext context, String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty || trimmed == '0' || trimmed == 'Error') return;
+    Clipboard.setData(ClipboardData(text: trimmed));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Copied  $trimmed'),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -108,24 +130,37 @@ class FractionCalculatorScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
-              constraints: BoxConstraints(
-                maxHeight: 40.h, // Keep result display compact
-                minHeight: 28.h,
-              ),
-              child: AutoSizeText(
-                state.displayText,
-                maxLines: 2,
-                minFontSize: 18.sp,
-                stepGranularity: 0.5.sp,
-                maxFontSize: constraints.maxWidth > 600 ? 24.sp : 28.sp,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+            GestureDetector(
+              onTap: () => _copyValue(context, state.displayText),
+              child: Container(
+                alignment: Alignment.centerRight,
+                padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                constraints: BoxConstraints(
+                  maxHeight: 40.h, // Keep result display compact
+                  minHeight: 28.h,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Icon(Icons.copy,
+                        color: Colors.grey.shade500, size: 14.dm),
+                    SizedBox(width: 6.w),
+                    Flexible(
+                      child: AutoSizeText(
+                        state.displayText,
+                        maxLines: 2,
+                        minFontSize: 18.sp,
+                        stepGranularity: 0.5.sp,
+                        maxFontSize: constraints.maxWidth > 600 ? 24.sp : 28.sp,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -135,27 +170,30 @@ class FractionCalculatorScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildResultContainers(CalculatorState state) {
+  Widget _buildResultContainers(BuildContext context, CalculatorState state) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 4.w),
       child: Row(
         children: [
           Expanded(
               child: _buildResultContainer(
-                  "li ft", state.linearResult, Colors.white)),
+                  context, "li ft", state.linearResult, Colors.white)),
           SizedBox(width: 4.r),
           Expanded(
               child: _buildResultContainer(
-                  "sq ft", state.squareResult, Color(0xFFC7ADD5))),
+                  context, "sq ft", state.squareResult, Color(0xFFC7ADD5))),
         ],
       ),
     );
   }
 
-  Widget _buildResultContainer(String label, String result, Color textColor) {
+  Widget _buildResultContainer(
+      BuildContext context, String label, String result, Color textColor) {
     return Padding(
       padding: EdgeInsets.all(6.w),
-      child: Container(
+      child: GestureDetector(
+        onTap: () => _copyValue(context, result),
+        child: Container(
         decoration: BoxDecoration(
           color: Colors.blue.withOpacity(0.1),
           border: Border.all(color: Colors.grey, width: 2.w),
@@ -183,6 +221,7 @@ class FractionCalculatorScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

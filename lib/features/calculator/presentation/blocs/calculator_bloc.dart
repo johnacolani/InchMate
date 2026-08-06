@@ -44,6 +44,29 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     on<NegateEvent>(_handleNegate);
     on<PercentEvent>(_handlePercent);
     on<BackspaceEvent>(_handleBackspace);
+    on<ReuseHistoryEvent>(_handleReuseHistory);
+    on<ClearHistoryEvent>(_handleClearHistory);
+  }
+
+  void _handleReuseHistory(
+      ReuseHistoryEvent event, Emitter<CalculatorState> emit) {
+    // Behaves like the state just after '=': the stored result becomes the
+    // current value and a following operator continues from it.
+    _expressionBuffer = '"${event.result}"';
+    _displayBuffer = event.result;
+    _justEvaluated = true;
+    _displayIsOperator = false;
+    emit(state.copyWith(
+      displayText: event.result,
+      expression: event.result,
+      linearResult: event.linearResult,
+      squareResult: event.squareResult,
+    ));
+  }
+
+  void _handleClearHistory(
+      ClearHistoryEvent event, Emitter<CalculatorState> emit) {
+    emit(state.copyWith(history: const []));
   }
   void _handleBackspace(BackspaceEvent event, Emitter<CalculatorState> emit) {
     // After '=' the buffer holds a quoted result token; backspacing a single
@@ -221,11 +244,23 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
       final linear = convertUnits.execute(result, false);
       final square = convertUnits.execute(result, true);
 
+      // Prepend to the history tape (newest first), stripping the quote
+      // tokens so the expression reads naturally. Cap the tape length.
+      final entry = CalcHistoryEntry(
+        expression: _expressionBuffer.replaceAll('"', '').trim(),
+        result: formattedResult,
+        linearResult: linear,
+        squareResult: square,
+      );
+      final updatedHistory = [entry, ...state.history];
+      if (updatedHistory.length > 50) updatedHistory.removeLast();
+
       emit(state.copyWith(
         displayText: formattedResult,
         expression: '$_expressionBuffer = $formattedResult',
         linearResult: linear,
         squareResult: square,
+        history: updatedHistory,
       ));
       // Store the result as a single quoted token so a mixed number (e.g.
       // "1 1/2") survives tokenization when the user keeps calculating.

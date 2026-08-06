@@ -28,3 +28,19 @@ class ParenthesisEvent extends CalculatorEvent {
   ParenthesisEvent(this.isOpen);
 }
 class BackspaceEvent extends CalculatorEvent {}
+
+/// Reuse a past result from the history tape as the current value, so the user
+/// can keep calculating from it.
+class ReuseHistoryEvent extends CalculatorEvent {
+  final String result;
+  final String linearResult;
+  final String squareResult;
+  ReuseHistoryEvent({
+    required this.result,
+    required this.linearResult,
+    required this.squareResult,
+  });
+}
+
+/// Clear the entire history tape.
+class ClearHistoryEvent extends CalculatorEvent {}

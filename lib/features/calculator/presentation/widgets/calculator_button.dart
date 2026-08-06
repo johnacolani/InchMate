@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -45,11 +46,16 @@ class CalculatorButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16.r)),
               elevation: 2,
             ),
-            child: Text(text,
-                style: TextStyle(
-                    fontSize: _getTextSize(),
-                    fontWeight: FontWeight.bold,
-                    color: colors.textColor)),
+            child: Transform.scale(
+              // Scales the glyph visually without affecting the button's
+              // layout size, so the footprint stays identical.
+              scale: _getTextScale(),
+              child: Text(text,
+                  style: TextStyle(
+                      fontSize: _getTextSize(),
+                      fontWeight: FontWeight.bold,
+                      color: colors.textColor)),
+            ),
           ),
         ),
       ),
@@ -57,6 +63,10 @@ class CalculatorButton extends StatelessWidget {
   }
 
   void _handlePress(BuildContext context) {
+    // Subtle tactile feedback on every key tap. lightImpact is felt more
+    // reliably than selectionClick across devices while staying gentle.
+    HapticFeedback.lightImpact();
+
     final bloc = context.read<CalculatorBloc>();
 
     if (text == "C") {
@@ -103,6 +113,17 @@ class CalculatorButton extends StatelessWidget {
   }
 
   double _getTextSize() => isFraction ? 14.sp : 16.sp;
+
+  // Enlarge glyphs without resizing the button. The four basic operators and
+  // the equals sign get the biggest bump; other keys are enlarged less, and
+  // fraction buttons keep their size to avoid horizontal overflow.
+  double _getTextScale() {
+    // The hyphen glyph is naturally small, so give it a bigger bump to match
+    // the other operators visually.
+    if (text == "-") return 2.4;
+    if (["÷", "×", "+", "="].contains(text)) return 1.6;
+    return isFraction ? 1.0 : 1.3;
+  }
 
   EdgeInsets _getPadding() => isFraction
       ?  EdgeInsets.symmetric(vertical: 8.h)
