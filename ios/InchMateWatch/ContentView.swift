@@ -92,7 +92,11 @@ struct ContentView: View {
         }
         .padding(6)
         .background(Palette.panel)
-        .cornerRadius(8)
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(borderGradient, lineWidth: 1.5)
+        )
     }
 
     private func handle(_ label: String) {
