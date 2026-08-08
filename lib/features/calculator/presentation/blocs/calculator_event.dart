@@ -44,3 +44,9 @@ class ReuseHistoryEvent extends CalculatorEvent {
 
 /// Clear the entire history tape.
 class ClearHistoryEvent extends CalculatorEvent {}
+
+/// Paste a copied value into the expression as an operand.
+class PasteEvent extends CalculatorEvent {
+  final String value;
+  PasteEvent(this.value);
+}

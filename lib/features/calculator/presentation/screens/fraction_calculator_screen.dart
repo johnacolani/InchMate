@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
 import '../blocs/calculator_bloc.dart';
+import '../blocs/calculator_event.dart';
 import '../blocs/calculator_state.dart';
 import '../widgets/app_info_overlay.dart';
 import '../widgets/calculator_button.dart';
@@ -40,6 +41,11 @@ class FractionCalculatorScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: Icon(Icons.content_paste, color: Colors.white, size: 19.dm),
+            tooltip: 'Paste value',
+            onPressed: () => _pasteValue(context),
+          ),
+          IconButton(
             icon: Icon(Icons.history, color: Colors.white, size: 20.dm),
             tooltip: 'History',
             onPressed: () => HistorySheet.show(context),
@@ -63,7 +69,7 @@ class FractionCalculatorScreen extends StatelessWidget {
                   children: [
                     _buildDisplaySection(context, state, constraints),
                     _buildResultContainers(context, state),
-                    _buildScrollableCalculatorButtons(context),
+                    _buildCalculatorButtons(context),
                     // _buildAdBanner(),
                   ],
                 ),
@@ -75,17 +81,53 @@ class FractionCalculatorScreen extends StatelessWidget {
     );
   }
 
+  void _showSnack(BuildContext context, String message) {
+    // Scale text with the device (ScreenUtil) and, on tablets, constrain the
+    // bar to a centered width so it doesn't stretch edge-to-edge with tiny text.
+    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15.sp),
+          ),
+          duration: const Duration(milliseconds: 1600),
+          behavior: SnackBarBehavior.floating,
+          width: isTablet ? 0.55.sw : null,
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        ),
+      );
+  }
+
   void _copyValue(BuildContext context, String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty || trimmed == '0' || trimmed == 'Error') return;
     Clipboard.setData(ClipboardData(text: trimmed));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Copied  $trimmed'),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    _showSnack(context, 'Copied  $trimmed  ·  tap paste ⧉ to use it');
+  }
+
+  // Matches an integer, fraction, or mixed number (optionally negative).
+  static final RegExp _pasteablePattern = RegExp(r'^-?\d+( \d+/\d+|/\d+)?$');
+
+  Future<void> _pasteValue(BuildContext context) async {
+    final bloc = context.read<CalculatorBloc>();
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!context.mounted) return;
+
+    final raw = (data?.text ?? '').replaceAll('"', '').trim();
+    if (raw.isEmpty) {
+      _showSnack(context, 'Clipboard is empty');
+      return;
+    }
+    if (!_pasteablePattern.hasMatch(raw)) {
+      _showSnack(context, "Can't paste \"$raw\" — not a number");
+      return;
+    }
+    bloc.add(PasteEvent(raw));
+    _showSnack(context, 'Pasted  $raw');
   }
 
   Widget _buildDisplaySection(
@@ -227,30 +269,30 @@ class FractionCalculatorScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScrollableCalculatorButtons(BuildContext context) {
-    return SizedBox(
-      height: 0.6.sh, // Max 60% of screen height to prevent overflow
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildOperatorRow(["C", "±", "%", "÷"]),
-            _buildNumberRow(["7", "8", "9", "×"]),
-            _buildNumberRow(["4", "5", "6", "-"]),
-            _buildNumberRow(["1", "2", "3", "+"]),
-            _buildBottomRow(),
-            _buildFractionRow(["1/4", "3/4", "(", ")"]),
-            _buildFractionRow(["1/8", "3/8", "5/8", "7/8"]),
-            _buildFractionRow(["1/16", "3/16", "5/16", "7/16"]),
-            _buildFractionRow(["9/16", "11/16", "13/16", "15/16"]),
-          ],
-        ),
+  Widget _buildCalculatorButtons(BuildContext context) {
+    // Fill all remaining vertical space and divide it evenly across rows so the
+    // whole keypad is always visible without scrolling — on phones and iPads.
+    final rows = [
+      _buildOperatorRow(["C", "±", "%", "÷"]),
+      _buildNumberRow(["7", "8", "9", "×"]),
+      _buildNumberRow(["4", "5", "6", "-"]),
+      _buildNumberRow(["1", "2", "3", "+"]),
+      _buildBottomRow(),
+      _buildFractionRow(["1/4", "3/4", "(", ")"]),
+      _buildFractionRow(["1/8", "3/8", "5/8", "7/8"]),
+      _buildFractionRow(["1/16", "3/16", "5/16", "7/16"]),
+      _buildFractionRow(["9/16", "11/16", "13/16", "15/16"]),
+    ];
+    return Expanded(
+      child: Column(
+        children: rows.map((row) => Expanded(child: row)).toList(),
       ),
     );
   }
 
   Widget _buildOperatorRow(List<String> buttons) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: buttons
           .map((text) => CalculatorButton(
                 text: text,
@@ -262,12 +304,14 @@ class FractionCalculatorScreen extends StatelessWidget {
 
   Widget _buildNumberRow(List<String> buttons) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: buttons.map((text) => CalculatorButton(text: text)).toList(),
     );
   }
 
   Widget _buildBottomRow() {
     return const Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CalculatorButton(text: "0"),
         CalculatorButton(text: "1/2"),
@@ -279,6 +323,7 @@ class FractionCalculatorScreen extends StatelessWidget {
 
   Widget _buildFractionRow(List<String> fractions) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: fractions
           .map((text) => CalculatorButton(
                 text: text,

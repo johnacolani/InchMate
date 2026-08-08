@@ -41,20 +41,27 @@ class CalculatorButton extends StatelessWidget {
             onPressed: () => _handlePress(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.backgroundColor,
-              padding: _getPadding(),
+              // The button fills its (stretched) cell, so remove sizing padding
+              // and center the glyph in both axes instead.
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              alignment: Alignment.center,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r)),
               elevation: 2,
             ),
-            child: Transform.scale(
-              // Scales the glyph visually without affecting the button's
-              // layout size, so the footprint stays identical.
-              scale: _getTextScale(),
-              child: Text(text,
-                  style: TextStyle(
-                      fontSize: _getTextSize(),
-                      fontWeight: FontWeight.bold,
-                      color: colors.textColor)),
+            child: Center(
+              child: Transform.scale(
+                // Scales the glyph visually without affecting the button's
+                // layout size, so the footprint stays identical.
+                scale: _getTextScale(),
+                child: Text(text,
+                    style: TextStyle(
+                        fontSize: _getTextSize(),
+                        fontWeight: FontWeight.bold,
+                        color: colors.textColor)),
+              ),
             ),
           ),
         ),
@@ -124,8 +131,4 @@ class CalculatorButton extends StatelessWidget {
     if (["÷", "×", "+", "="].contains(text)) return 1.6;
     return isFraction ? 1.0 : 1.3;
   }
-
-  EdgeInsets _getPadding() => isFraction
-      ?  EdgeInsets.symmetric(vertical: 8.h)
-      :  EdgeInsets.all(10.w);
 }

@@ -46,6 +46,36 @@ class CalculatorBloc extends Bloc<CalculatorEvent, CalculatorState> {
     on<BackspaceEvent>(_handleBackspace);
     on<ReuseHistoryEvent>(_handleReuseHistory);
     on<ClearHistoryEvent>(_handleClearHistory);
+    on<PasteEvent>(_handlePaste);
+  }
+
+  // Accepts an integer, fraction, or mixed number, optionally negative.
+  static final RegExp _pasteablePattern = RegExp(r'^-?\d+( \d+/\d+|/\d+)?$');
+
+  void _handlePaste(PasteEvent event, Emitter<CalculatorState> emit) {
+    final value = event.value.replaceAll('"', '').trim();
+    if (!_pasteablePattern.hasMatch(value)) return;
+
+    // After '=' a paste starts a fresh expression, mirroring digit entry.
+    if (_justEvaluated) {
+      _expressionBuffer = '';
+      _displayBuffer = '0';
+      _justEvaluated = false;
+    }
+
+    // Insert as a single quoted token so mixed numbers survive tokenization.
+    final token = '"$value"';
+    if (_expressionBuffer.isEmpty || _expressionBuffer.endsWith(' ')) {
+      _expressionBuffer += token;
+    } else {
+      _expressionBuffer += ' $token';
+    }
+    _displayBuffer = value;
+    _displayIsOperator = false;
+    emit(state.copyWith(
+      displayText: _displayBuffer,
+      expression: _expressionBuffer,
+    ));
   }
 
   void _handleReuseHistory(
