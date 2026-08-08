@@ -68,8 +68,9 @@ class FractionCalculatorScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildDisplaySection(context, state, constraints),
-                    _buildResultContainers(context, state),
                     _buildCalculatorButtons(context),
+                    // li ft / sq ft results pinned to the bottom of the screen.
+                    _buildResultContainers(context, state),
                     // _buildAdBanner(),
                   ],
                 ),

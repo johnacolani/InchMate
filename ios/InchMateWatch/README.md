@@ -5,7 +5,8 @@ app and reimplements the fraction math in Swift, because Flutter/Dart cannot run
 on watchOS.
 
 Files (add all to the watch target):
-- `InchMateWatchApp.swift` — `@main` entry point
+- `InchMateWatchApp.swift` — `@main` entry point (shows `RootView`)
+- `SplashView.swift` — animated launch screen + `RootView` (splash → calculator)
 - `ContentView.swift` — SwiftUI keypad + display
 - `WatchCalculator.swift` — calculator state / expression evaluation
 - `WatchFraction.swift` — exact fraction math, parsing, formatting, ft/in conversion

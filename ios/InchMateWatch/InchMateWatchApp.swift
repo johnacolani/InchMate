@@ -4,7 +4,7 @@ import SwiftUI
 struct InchMateWatchApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
         }
     }
 }
