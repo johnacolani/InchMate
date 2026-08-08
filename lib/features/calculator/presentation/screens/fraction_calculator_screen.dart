@@ -68,9 +68,32 @@ class FractionCalculatorScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildDisplaySection(context, state, constraints),
-                    _buildCalculatorButtons(context),
-                    // li ft / sq ft results pinned to the bottom of the screen.
-                    _buildResultContainers(context, state),
+                    // Border framing the keypad (operators/numbers/fractions)
+                    // together with the li ft / sq ft results row.
+                    Expanded(
+                      child: Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 4.w, vertical: 4.h),
+                        padding: EdgeInsets.all(4.w),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: GradientBoxBorder(
+                            width: 1.5.dm,
+                            gradient: LinearGradient(colors: [
+                              Colors.blue.shade300,
+                              Colors.purple.shade300,
+                            ]),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            _buildCalculatorButtons(context),
+                            // li ft / sq ft results pinned to the bottom.
+                            _buildResultContainers(context, state),
+                          ],
+                        ),
+                      ),
+                    ),
                     // _buildAdBanner(),
                   ],
                 ),
