@@ -41,8 +41,13 @@ struct ContentView: View {
                     }
                 }
             }
-            .padding(4)
+            .padding(.horizontal, 4)
+            .padding(.top, 2)
+            .padding(.bottom, 4)
         }
+        // Use the top area so the calculator starts near the top (the system
+        // clock still sits in its corner — watchOS won't let apps hide it).
+        .ignoresSafeArea(.container, edges: .top)
         .background(Palette.background.ignoresSafeArea())
     }
 
