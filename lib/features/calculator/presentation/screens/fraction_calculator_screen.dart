@@ -213,58 +213,65 @@ class FractionCalculatorScreen extends StatelessWidget {
   }
 
   Widget _buildResultContainers(BuildContext context, CalculatorState state) {
+    // Single row: linear feet anchored to the left, square feet to the right.
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 4.w),
+      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 10.w),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-              child: _buildResultContainer(
-                  context, "li ft", state.linearResult, Colors.white)),
-          SizedBox(width: 4.r),
-          Expanded(
-              child: _buildResultContainer(
-                  context, "sq ft", state.squareResult, Color(0xFFC7ADD5))),
+          Flexible(
+            child: _buildResultInline(
+                context, "li ft", state.linearResult, Colors.white,
+                alignEnd: false),
+          ),
+          SizedBox(width: 12.w),
+          Flexible(
+            child: _buildResultInline(context, "sq ft", state.squareResult,
+                const Color(0xFFC7ADD5),
+                alignEnd: true),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildResultContainer(
-      BuildContext context, String label, String result, Color textColor) {
-    return Padding(
-      padding: EdgeInsets.all(6.w),
-      child: GestureDetector(
-        onTap: () => _copyValue(context, result),
-        child: Container(
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          border: Border.all(color: Colors.grey, width: 2.w),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(label,
-                  style: TextStyle(color: Colors.white, fontSize: 12.sp)),
-              Expanded(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    result,
-                    style: TextStyle(
-                      fontSize: 18.sp, // Bigger on larger screens
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+  Widget _buildResultInline(BuildContext context, String label, String result,
+      Color textColor,
+      {required bool alignEnd}) {
+    final labelWidget = Text(
+      label,
+      style: TextStyle(color: Colors.grey.shade400, fontSize: 12.sp),
+    );
+    final valueWidget = Flexible(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
+        child: Text(
+          result,
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.bold,
+            color: textColor,
           ),
         ),
-        ),
+      ),
+    );
+
+    // Keep the label adjacent to the value; order flips so each pair reads
+    // naturally at its edge (li ft on the left, sq ft on the right).
+    final children = alignEnd
+        ? [valueWidget, SizedBox(width: 6.w), labelWidget]
+        : [labelWidget, SizedBox(width: 6.w), valueWidget];
+
+    return GestureDetector(
+      onTap: () => _copyValue(context, result),
+      behavior: HitTestBehavior.opaque,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment:
+            alignEnd ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: children,
       ),
     );
   }

@@ -17,13 +17,16 @@ struct ContentView: View {
     @StateObject private var calc = WatchCalculator()
 
     // 4-column keypad; scrolls vertically (Digital Crown works too).
+    // Full fraction set: halves, quarters, eighths, and all sixteenths.
     private let rows: [[String]] = [
         ["C", "⌫", "÷", "×"],
         ["7", "8", "9", "-"],
         ["4", "5", "6", "+"],
         ["1", "2", "3", "="],
-        ["0", "1/2", "1/4", "1/8"],
+        ["0", "1/2", "1/4", "3/4"],
+        ["1/8", "3/8", "5/8", "7/8"],
         ["1/16", "3/16", "5/16", "7/16"],
+        ["9/16", "11/16", "13/16", "15/16"],
     ]
 
     var body: some View {
