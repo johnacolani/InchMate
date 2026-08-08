@@ -29,17 +29,33 @@ struct ContentView: View {
         ["9/16", "11/16", "13/16", "15/16"],
     ]
 
+    // Blue→purple frame matching the phone/tablet calculator border.
+    private var borderGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(red: 0.39, green: 0.71, blue: 0.96),
+                     Color(red: 0.73, green: 0.41, blue: 0.78)],
+            startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
+
     var body: some View {
         ScrollView {
-            VStack(spacing: 4) {
+            VStack(spacing: 6) {
                 display
-                ForEach(rows.indices, id: \.self) { r in
-                    HStack(spacing: 4) {
-                        ForEach(rows[r], id: \.self) { label in
-                            CalcButton(label: label) { handle(label) }
+                // Keypad framed with the same gradient border as the phone app.
+                VStack(spacing: 4) {
+                    ForEach(rows.indices, id: \.self) { r in
+                        HStack(spacing: 4) {
+                            ForEach(rows[r], id: \.self) { label in
+                                CalcButton(label: label) { handle(label) }
+                            }
                         }
                     }
                 }
+                .padding(5)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(borderGradient, lineWidth: 1.5)
+                )
             }
             .padding(.horizontal, 4)
             .padding(.top, 2)
