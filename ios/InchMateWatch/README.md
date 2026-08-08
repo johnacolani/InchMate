@@ -11,6 +11,14 @@ Files (add all to the watch target):
 - `WatchCalculator.swift` — calculator state / expression evaluation
 - `WatchFraction.swift` — exact fraction math, parsing, formatting, ft/in conversion
 
+## App icon
+
+The watch app icon lives in `ios/InchMateWatch/Assets.xcassets/AppIcon.appiconset/`
+(all watchOS sizes + the 1024 marketing icon, alpha stripped). When you add the
+Xcode watch target below, include this `Assets.xcassets` in the target and set its
+App Icon source to **AppIcon** — the icon then appears on the watch. The
+`run_on_sim.sh` script also compiles it into the simulator build.
+
 ## One-time Xcode setup
 
 Flutter cannot create the watch target — do this once in Xcode:

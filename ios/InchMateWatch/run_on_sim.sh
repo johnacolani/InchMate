@@ -50,6 +50,21 @@ cat > "$APP/Info.plist" <<'PLIST'
 </dict></plist>
 PLIST
 
+# 3b. Compile the app-icon asset catalog into the bundle (if present).
+if [ -d "$SRC_DIR/Assets.xcassets" ]; then
+  echo "▸ Compiling app icon…"
+  xcrun actool "$SRC_DIR/Assets.xcassets" \
+    --compile "$APP" \
+    --platform watchsimulator \
+    --minimum-deployment-target 11.0 \
+    --app-icon AppIcon \
+    --output-partial-info-plist "$OUT/icon-partial.plist" >/dev/null 2>&1 || true
+  # Merge the icon keys actool produced into the app Info.plist.
+  if [ -f "$OUT/icon-partial.plist" ]; then
+    /usr/libexec/PlistBuddy -c "Merge $OUT/icon-partial.plist" "$APP/Info.plist" >/dev/null 2>&1 || true
+  fi
+fi
+
 # 4. Install and launch.
 echo "▸ Installing & launching…"
 xcrun simctl install "$WATCH" "$APP"
