@@ -48,17 +48,15 @@ fraction,calculator,carpenter,construction,woodworking,feet,inch,measurement,con
 
 ## Support URL  (required)
 
-https://<your-support-page>
+https://www.4ideasapp.com/
 
-(You must provide a working URL. Easiest free options: a GitHub Pages site, a
-Notion public page, or a simple one-page Google Site with your app name and a
-contact email.)
+(Support contact: info@4ideasapp.com)
 
 ---
 
 ## Marketing URL  (optional)
 
-https://<your-marketing-page>
+https://www.4ideasapp.com/portfolio
 
 ---
 

@@ -42,4 +42,8 @@ If this policy changes, the updated version will be posted at this URL with a ne
 
 ## Contact
 
-If you have any questions about this Privacy Policy, contact us at: [johnacolani@gmail.com](mailto:johnacolani@gmail.com).
+If you have any questions about this Privacy Policy, contact us at:
+
+- Email: [info@4ideasapp.com](mailto:info@4ideasapp.com)
+- Website: [https://www.4ideasapp.com](https://www.4ideasapp.com/)
+- Portfolio: [https://www.4ideasapp.com/portfolio](https://www.4ideasapp.com/portfolio)
