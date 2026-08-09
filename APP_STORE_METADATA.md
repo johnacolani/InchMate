@@ -66,6 +66,27 @@ https://www.4ideasapp.com/portfolio
 
 ---
 
+## App Privacy questionnaire (App Store Connect → App Privacy)
+
+Based on the privacy policy, InchMate collects no data.
+
+- **Data Collection — "Do you or your third-party partners collect data from this app?"**
+  → **No, we do not collect data from this app.**
+  (Result: the listing shows "Data Not Collected." No further data-type screens.)
+
+Other submission answers:
+- Advertising Identifier (IDFA): **No**
+- Tracking (across apps/websites): **No**
+- Third-party SDKs collecting data: **No**
+- Export compliance — uses non-exempt encryption: **No**
+  (already declared via ITSAppUsesNonExemptEncryption = false in Info.plist)
+
+Rationale: all calculations run on-device; no accounts, analytics, ads, or
+tracking. The update check only queries Apple's public App Store service, and
+copy/paste and external links stay on the device.
+
+---
+
 ## Notes
 - The Keywords string is 99 characters as written — stay at/under 100 if you edit it.
 - Don't repeat the app name ("InchMate") in Keywords; the title is already indexed.
