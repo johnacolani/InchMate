@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: August 4, 2026_
+_Last updated: August 8, 2026_
 
 InchMate ("the App", "we", "us") is a calculator utility for working with fractions, feet-and-inch measurements, and area conversions. We respect your privacy. This policy explains what information the App does and does not handle.
 
@@ -10,7 +10,16 @@ InchMate ("the App", "we", "us") is a calculator utility for working with fracti
 
 ## Data Stored on Your Device
 
-Any values you enter exist only in the App's memory while you use it and are not saved to a remote server. We have no access to them.
+Any values you enter, including your recent calculation history, exist only in the App's memory while you use it and are not saved to a remote server. We have no access to them.
+
+## Clipboard
+
+The App includes copy and paste features that you control:
+
+- **Copy:** When you copy a result, it is placed on your device's clipboard so you can paste it into another app (for example, a message to a client). 
+- **Paste:** When you tap Paste, the App reads the current text from your device's clipboard only to insert that value into the calculator.
+
+This happens entirely on your device. Copied or pasted values are never sent to us or to any third party, and the App does not read your clipboard except when you tap Paste.
 
 ## Network Access
 
