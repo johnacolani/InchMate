@@ -41,7 +41,7 @@ class FractionCalculatorScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.content_paste, color: Colors.white, size: 19.dm),
+            icon: Icon(Icons.paste, color: Colors.white, size: 19.dm),
             tooltip: 'Paste value',
             onPressed: () => _pasteValue(context),
           ),
@@ -68,8 +68,7 @@ class FractionCalculatorScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildDisplaySection(context, state, constraints),
-                    // Border framing the keypad (operators/numbers/fractions)
-                    // together with the li ft / sq ft results row.
+                    _buildResultContainers(context, state),
                     Expanded(
                       child: Container(
                         margin: EdgeInsets.symmetric(
@@ -85,13 +84,7 @@ class FractionCalculatorScreen extends StatelessWidget {
                             ]),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            _buildCalculatorButtons(context),
-                            // li ft / sq ft results pinned to the bottom.
-                            _buildResultContainers(context, state),
-                          ],
-                        ),
+                        child: _buildCalculatorButtons(context),
                       ),
                     ),
                     // _buildAdBanner(),
@@ -105,7 +98,8 @@ class FractionCalculatorScreen extends StatelessWidget {
     );
   }
 
-  void _showSnack(BuildContext context, String message) {
+  void _showSnack(BuildContext context, String message,
+      {IconData? icon}) {
     // Scale text with the device (ScreenUtil) and, on tablets, constrain the
     // bar to a centered width so it doesn't stretch edge-to-edge with tiny text.
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
@@ -113,11 +107,27 @@ class FractionCalculatorScreen extends StatelessWidget {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 15.sp),
-          ),
+          content: icon == null
+              ? Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15.sp),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, size: 18.sp, color: Colors.white),
+                    SizedBox(width: 8.w),
+                    Flexible(
+                      child: Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 15.sp),
+                      ),
+                    ),
+                  ],
+                ),
           duration: const Duration(milliseconds: 1600),
           behavior: SnackBarBehavior.floating,
           width: isTablet ? 0.55.sw : null,
@@ -130,7 +140,8 @@ class FractionCalculatorScreen extends StatelessWidget {
     final trimmed = value.trim();
     if (trimmed.isEmpty || trimmed == '0' || trimmed == 'Error') return;
     Clipboard.setData(ClipboardData(text: trimmed));
-    _showSnack(context, 'Copied  $trimmed  ·  tap paste ⧉ to use it');
+    _showSnack(context, 'Copied  $trimmed  ·  tap paste ⧉ to use it',
+        icon: Icons.paste);
   }
 
   // Matches an integer, fraction, or mixed number (optionally negative).
@@ -238,18 +249,34 @@ class FractionCalculatorScreen extends StatelessWidget {
 
   Widget _buildResultContainers(BuildContext context, CalculatorState state) {
     // Single row: linear feet anchored to the left, square feet to the right.
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 10.w),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F1E1E),
+        borderRadius: BorderRadius.circular(14.r),
+        border: GradientBoxBorder(
+          width: 1.5.dm,
+          gradient: LinearGradient(colors: [
+            Colors.blue.shade300,
+            Colors.purple.shade300,
+          ]),
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Flexible(
             child: _buildResultInline(
-                context, "li ft", state.linearResult, Colors.white,
+                context, "", state.linearResult, Colors.white,
                 alignEnd: false),
           ),
-          SizedBox(width: 12.w),
+          Container(
+            height: 28.h,
+            width: 1.2,
+            color: Colors.grey.shade700,
+          ),
           Flexible(
             child: _buildResultInline(context, "sq ft", state.squareResult,
                 const Color(0xFFC7ADD5),
@@ -263,6 +290,7 @@ class FractionCalculatorScreen extends StatelessWidget {
   Widget _buildResultInline(BuildContext context, String label, String result,
       Color textColor,
       {required bool alignEnd}) {
+    final showLabel = label.trim().isNotEmpty;
     final labelWidget = Text(
       label,
       style: TextStyle(color: Colors.grey.shade400, fontSize: 12.sp),
@@ -282,11 +310,17 @@ class FractionCalculatorScreen extends StatelessWidget {
       ),
     );
 
-    // Keep the label adjacent to the value; order flips so each pair reads
-    // naturally at its edge (li ft on the left, sq ft on the right).
     final children = alignEnd
-        ? [valueWidget, SizedBox(width: 6.w), labelWidget]
-        : [labelWidget, SizedBox(width: 6.w), valueWidget];
+        ? [
+            valueWidget,
+            if (showLabel) SizedBox(width: 6.w),
+            if (showLabel) labelWidget,
+          ]
+        : [
+            if (showLabel) labelWidget,
+            if (showLabel) SizedBox(width: 6.w),
+            valueWidget,
+          ];
 
     return GestureDetector(
       onTap: () => _copyValue(context, result),
@@ -301,8 +335,6 @@ class FractionCalculatorScreen extends StatelessWidget {
   }
 
   Widget _buildCalculatorButtons(BuildContext context) {
-    // Fill all remaining vertical space and divide it evenly across rows so the
-    // whole keypad is always visible without scrolling — on phones and iPads.
     final rows = [
       _buildOperatorRow(["C", "±", "%", "÷"]),
       _buildNumberRow(["7", "8", "9", "×"]),
@@ -314,10 +346,19 @@ class FractionCalculatorScreen extends StatelessWidget {
       _buildFractionRow(["1/16", "3/16", "5/16", "7/16"]),
       _buildFractionRow(["9/16", "11/16", "13/16", "15/16"]),
     ];
-    return Expanded(
-      child: Column(
-        children: rows.map((row) => Expanded(child: row)).toList(),
-      ),
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final rowHeight = constraints.maxHeight / rows.length;
+        return Column(
+          children: rows
+              .map((row) => SizedBox(
+                    height: rowHeight,
+                    child: row,
+                  ))
+              .toList(),
+        );
+      },
     );
   }
 

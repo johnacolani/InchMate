@@ -16,7 +16,7 @@ class _AppInfoOverlayState extends State<AppInfoOverlay>
   late Animation<double> _widthAnimation;
 
   static const String _appVersion = '1.1.1';
-  static const String _contactEmail = 'johnacolani@gmail.com';
+  static const String _contactEmail = 'info@4ideasapp.com';
   static const String _websiteUrl = 'https://www.4ideasapp.com/';
 
   Future<void> _launchEmail() async {
@@ -47,10 +47,16 @@ class _AppInfoOverlayState extends State<AppInfoOverlay>
           'Use +, −, ×, ÷ and parentheses, then press = to evaluate your expression.',
     ),
     _HelpItem(
+      icon: Icons.content_copy,
+      title: 'Copy & paste',
+      description:
+          'Tap the copy icon beside a result, then use the paste button in the top bar to reuse it. You can paste values like 120 7/8 or 3/4.',
+    ),
+    _HelpItem(
       icon: Icons.straighten,
       title: 'Read the results',
       description:
-          '“li ft” shows the linear-feet result and “sq ft” shows the square-feet result of your calculation.',
+          'Use the left result for linear measurements and the right result for square footage. The foot and inch markers are shown as ’ and ".',
     ),
     _HelpItem(
       icon: Icons.backspace,
@@ -86,7 +92,7 @@ class _AppInfoOverlayState extends State<AppInfoOverlay>
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: Scaffold(
-        backgroundColor: Colors.black.withOpacity(0.3),
+        backgroundColor: Colors.black.withValues(alpha: 0.3),
         body: SafeArea(
           child: Center(
             child: AnimatedBuilder(

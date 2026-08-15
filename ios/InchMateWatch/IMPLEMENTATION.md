@@ -170,3 +170,8 @@ handles arch, Info.plist, and embedding into the iOS app automatically. See
 - **Model → State → View** separation keeps the math testable on its own.
 - **Exact integer fractions** avoid floating-point drift — essential for a
   measurement tool.
+
+
+
+bash ios/InchMateWatch/run_on_sim.sh
+

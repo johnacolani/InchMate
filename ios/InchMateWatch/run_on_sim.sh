@@ -40,8 +40,8 @@ cat > "$APP/Info.plist" <<'PLIST'
   <key>CFBundleIdentifier</key><string>com.johncolani.inchmatewatch</string>
   <key>CFBundleName</key><string>InchMateWatch</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>1.0</string>
-  <key>CFBundleVersion</key><string>1</string>
+  <key>CFBundleShortVersionString</key><string>1.1.3</string>
+  <key>CFBundleVersion</key><string>6</string>
   <key>CFBundleSupportedPlatforms</key><array><string>WatchSimulator</string></array>
   <key>MinimumOSVersion</key><string>11.0</string>
   <key>UIDeviceFamily</key><array><integer>4</integer></array>

@@ -9,6 +9,25 @@ import '../blocs/calculator_state.dart';
 
 /// Bottom-sheet history tape. Tap a row to reuse its result; tap the copy icon
 /// to copy the value to the clipboard.
+void _showCopySnack(BuildContext context, String message) {
+  final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(
+          'Copied  $message',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 15.sp),
+        ),
+        duration: const Duration(milliseconds: 1600),
+        behavior: SnackBarBehavior.floating,
+        width: isTablet ? 0.55.sw : null,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      ),
+    );
+}
+
 class HistorySheet extends StatelessWidget {
   const HistorySheet({super.key});
 
@@ -173,24 +192,7 @@ class _HistoryTile extends StatelessWidget {
               icon: Icon(Icons.copy, color: Colors.grey.shade400, size: 18.dm),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: entry.result));
-                final isTablet =
-                    MediaQuery.of(context).size.shortestSide >= 600;
-                ScaffoldMessenger.of(context)
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Copied  ${entry.result}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 15.sp),
-                      ),
-                      duration: const Duration(milliseconds: 1600),
-                      behavior: SnackBarBehavior.floating,
-                      width: isTablet ? 0.55.sw : null,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                    ),
-                  );
+                _showCopySnack(context, entry.result);
               },
             ),
           ],

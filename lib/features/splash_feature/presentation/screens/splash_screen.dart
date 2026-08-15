@@ -27,40 +27,40 @@ class _SplashScreenState extends State<SplashScreen> {
   }
   Future<void> _checkVersionAndStartSplash() async {
     final newVersion = NewVersionPlus(
-      iOSId: '6742278209', // Add your iOS App ID here (e.g., 'id123456789')
+      iOSId: '6742278209',
       androidId: 'com.johncolani.fractioflow',
     );
 
     try {
-      final status = await newVersion.getVersionStatus();
+      final status = await newVersion
+          .getVersionStatus()
+          .timeout(const Duration(seconds: 4), onTimeout: () => null);
+
       if (!mounted) return;
-      if (status != null) {
-        if (status.canUpdate) {
-          newVersion.showUpdateDialog(
-            context: context,
-            versionStatus: status,
-            dialogTitle: 'Update Available',
-            dialogText:
-            'A new version (${status.storeVersion}) is available. Current version is ${status.localVersion}.',
-            updateButtonText: 'Update Now',
-            dismissButtonText: 'Later',
-            allowDismissal: true,
-            dismissAction: () {
-              if (!mounted) return;
-              Navigator.of(context).pop(); // Dismiss dialog
-              context.read<SplashBloc>().add(StartSplash()); // Start splash logic
-            },
-          );
-        } else {
-          // No update, start splash immediately
-          context.read<SplashBloc>().add(StartSplash());
-        }
-      } else {
-        context.read<SplashBloc>().add(StartSplash()); // Proceed anyway
+
+      if (status != null && status.canUpdate) {
+        newVersion.showUpdateDialog(
+          context: context,
+          versionStatus: status,
+          dialogTitle: 'Update Available',
+          dialogText:
+              'A new version (${status.storeVersion}) is available. Current version is ${status.localVersion}.',
+          updateButtonText: 'Update Now',
+          dismissButtonText: 'Later',
+          allowDismissal: true,
+          dismissAction: () {
+            if (!mounted) return;
+            Navigator.of(context).pop();
+            context.read<SplashBloc>().add(StartSplash());
+          },
+        );
+        return;
       }
-    } catch (e) {
+
+      context.read<SplashBloc>().add(StartSplash());
+    } catch (_) {
       if (!mounted) return;
-      context.read<SplashBloc>().add(StartSplash()); // Proceed on error
+      context.read<SplashBloc>().add(StartSplash());
     }
   }
   @override

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.2+5
+version: 1.1.4+11
 
 environment:
   sdk: ^3.5.4
@@ -58,12 +58,14 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.1
 
 # App icon generation (run: dart run flutter_launcher_icons)
+# Keep the existing icon artwork intact for iOS; alpha stripping can make the
+# app icon render as black on archive/TestFlight installs.
 flutter_launcher_icons:
   image_path: "assets/icon/inchmate_icon.png"
   android: true
   ios: true
-  remove_alpha_ios: true
-  background_color_ios: "#191818"
+  remove_alpha_ios: false
+  background_color_ios: "transparent"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
