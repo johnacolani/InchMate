@@ -11,19 +11,39 @@ import '../blocs/calculator_state.dart';
 /// to copy the value to the clipboard.
 void _showCopySnack(BuildContext context, String message) {
   final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-  ScaffoldMessenger.of(context)
+  final rootContext = Navigator.of(context, rootNavigator: true).context;
+  final messenger = ScaffoldMessenger.maybeOf(rootContext) ??
+      ScaffoldMessenger.maybeOf(context);
+
+  if (messenger == null) return;
+
+  messenger
     ..hideCurrentSnackBar()
     ..showSnackBar(
       SnackBar(
-        content: Text(
-          'Copied  $message',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15.sp),
+        content: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.paste, size: 18.sp, color: Colors.white),
+            SizedBox(width: 8.w),
+            Flexible(
+              child: Text(
+                'Copied  $message  ·  tap paste ⧉ to use it',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 15.sp),
+              ),
+            ),
+          ],
         ),
         duration: const Duration(milliseconds: 1600),
         behavior: SnackBarBehavior.floating,
-        width: isTablet ? 0.55.sw : null,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        margin: EdgeInsets.only(
+          left: 16.w,
+          right: 16.w,
+          top: isTablet ? 18.h : 12.h,
+        ),
       ),
     );
 }
@@ -141,21 +161,22 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        context.read<CalculatorBloc>().add(ReuseHistoryEvent(
-              result: entry.result,
-              linearResult: entry.linearResult,
-              squareResult: entry.squareResult,
-            ));
-        Navigator.of(context).pop();
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 4.w),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                context.read<CalculatorBloc>().add(ReuseHistoryEvent(
+                      result: entry.result,
+                      linearResult: entry.linearResult,
+                      squareResult: entry.squareResult,
+                    ));
+                Navigator.of(context).pop();
+              },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -188,15 +209,21 @@ class _HistoryTile extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.copy, color: Colors.grey.shade400, size: 18.dm),
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: entry.result));
-                _showCopySnack(context, entry.result);
-              },
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: Icon(Icons.copy, color: Colors.grey.shade400, size: 18.dm),
+            onPressed: () {
+              final rootContext = Navigator.of(context, rootNavigator: true).context;
+              Clipboard.setData(ClipboardData(text: entry.result));
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
+              }
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _showCopySnack(rootContext, entry.result);
+              });
+            },
+          ),
+        ],
       ),
     );
   }
