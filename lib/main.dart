@@ -9,10 +9,10 @@ import 'features/calculator/domain/usecases/parse_fraction_use_case.dart';
 import 'features/calculator/presentation/blocs/calculator_bloc.dart';
 import 'features/splash_feature/presentation/bloc/splash_bloc.dart';
 
-void main() => runApp(const CalculatorApp());
+void main() => runApp(const InchMateApp());
 
-class CalculatorApp extends StatelessWidget {
-  const CalculatorApp({super.key});
+class InchMateApp extends StatelessWidget {
+  const InchMateApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class CalculatorApp extends StatelessWidget {
           ],
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
-            title: 'Calculator',
+            title: 'InchMate',
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
