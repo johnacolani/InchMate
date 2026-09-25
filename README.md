@@ -1,16 +1,28 @@
 # InchMate
 
-A new Flutter project.
+InchMate is a feet-and-inches fraction calculator for contractors, carpenters, woodworkers, installers, and DIY users.
 
-## Getting Started
+It supports exact fraction calculations using common tape-measure values, including 1/2, 1/4, 1/8, and 1/16. Calculations run on-device, with no account required.
 
-This project is a starting point for a Flutter application.
+## Core capabilities
 
-A few resources to get you started if this is your first Flutter project:
+- Add, subtract, multiply, and divide mixed feet-and-inch values
+- Work with exact fractions without unnecessary rounding
+- Convert results to linear feet and square feet
+- Review and reuse calculation history
+- Copy and paste values
+- Support portrait and landscape layouts
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Development
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+This is a Flutter application.
+
+Before building, install Flutter and the platform tooling required for the target platform. Then run:
+
+```bash
+flutter pub get
+flutter test
+flutter analyze
+```
+
+For Apple release preparation, see [APP_STORE_RELEASE_GUIDE.md](APP_STORE_RELEASE_GUIDE.md).
